@@ -17,12 +17,14 @@ export async function procesarMensaje(sesion: Sesion, mensaje: string, llm: LlmA
   sesion.chat.push({ rol: "usuario", texto: mensaje, ts: new Date().toISOString() })
   const confirmaEsteTurno = AFIRMACION.test(mensaje)
   const llamadas: LlamadaVisible[] = []
-  const textos: string[] = []
+  // El texto entre llamadas son notas de trabajo del modelo; a la usuaria solo va la respuesta final.
+  const intermedios: string[] = []
+  let final: string | null = null
   let error: string | undefined
 
   for (let i = 0; ; i++) {
     if (i >= cfg.maxIteraciones) {
-      textos.push(`Alcancé el límite de ${cfg.maxIteraciones} pasos en este turno. Arriba está lo que alcancé a hacer; pídeme continuar para seguir con lo pendiente.`)
+      final = `${intermedios.join("\n\n")}\n\nAlcancé el límite de ${cfg.maxIteraciones} pasos en este turno. Arriba está lo que alcancé a hacer; pídeme continuar para seguir con lo pendiente.`.trim()
       break
     }
     if (sesion.tokens >= cfg.maxTokensSesion) {
@@ -38,9 +40,12 @@ export async function procesarMensaje(sesion: Sesion, mensaje: string, llm: LlmA
     }
     sesion.tokens += r.tokens
     sesion.turnos.push({ rol: "asistente", texto: r.texto, llamadas: r.llamadas, crudo: r.crudo })
-    if (r.texto) textos.push(r.texto)
     if (r.fin === "rechazo") error = "El modelo declinó responder esta solicitud."
-    if (r.llamadas.length === 0) break
+    if (r.llamadas.length === 0) {
+      final = r.texto
+      break
+    }
+    if (r.texto) intermedios.push(r.texto)
 
     const resultados: ResultadoHerramienta[] = []
     for (const l of r.llamadas) {
@@ -53,7 +58,7 @@ export async function procesarMensaje(sesion: Sesion, mensaje: string, llm: LlmA
 
   // R-22: hay confirmación pendiente si alguna herramienta dejó un mensaje en revisión (dato, no texto del modelo).
   const needsConfirmation = Object.keys(sesion.pendientes).length > 0
-  const reply = textos.join("\n\n")
+  const reply = final ?? intermedios.join("\n\n")
   const entrada: EntradaChat = { rol: "agente", texto: reply, ts: new Date().toISOString(), toolCalls: llamadas, needsConfirmation, ...(error ? { error } : {}) }
   sesion.chat.push(entrada)
   guardarSesion(ctx.directory, sesion)

@@ -2,7 +2,8 @@
 // aunque el modelo intente autoconfirmarse. No requiere clave. Uso: npm test
 
 import assert from "node:assert/strict"
-import { readFileSync } from "node:fs"
+import { mkdtempSync, readFileSync, symlinkSync } from "node:fs"
+import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { beforeEach, test } from "node:test"
 import { fileURLToPath } from "node:url"
@@ -12,7 +13,9 @@ import { limpiarOut, type Ctx } from "../src/core/store.ts"
 import { ErrorLlm, type LlamadaHerramienta, type LlmAdapter, type RespuestaLlm } from "../src/llm/adapter.ts"
 
 process.env.FECHA_HOY = "2026-09-03"
-const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..")
+// Directorio temporal con enlace a los fixtures: los tests nunca tocan el out/ real del proyecto.
+const RAIZ = mkdtempSync(join(tmpdir(), "reto02-"))
+symlinkSync(join(dirname(fileURLToPath(import.meta.url)), "..", "fixtures"), join(RAIZ, "fixtures"))
 const ctx: Ctx = { directory: RAIZ, sessionId: "test" }
 const cfg = { maxIteraciones: 25, maxTokensSesion: 1_000_000 }
 

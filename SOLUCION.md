@@ -65,7 +65,7 @@ Cambiar una regla de negocio (umbral de confianza, días de alerta, fecha de cor
 | Por qué | El trabajo del modelo es **orquestar y explicar**, no extraer. Necesito fiabilidad para seguir el flujo, no llamar `registrar` antes de tiempo y redactar preguntas de confirmación precisas. Opus 5.5 ofrece la mejor fiabilidad en uso de herramientas a un precio de $4 / $20 por millón de tokens (entrada / salida) |
 | Configuración | `effort: medium`, prompt de sistema con caché (`cache_control`) y **fallback del lado del servidor** ante rechazos (`fallbacks: "default"`), para que un falso positivo del filtro de seguridad no rompa la demo |
 
-**Costo estimado** (estimación a validar con el contador `tokens` de cada sesión, no una medición): procesar el buzón completo implica unas 10 a 14 llamadas al modelo, con unos 8 a 15 mil tokens de entrada cada una (prompt, herramientas e historial, la mayoría desde caché) y unos 2 a 4 mil de salida en total.
+**Costo.** Medición real con el prompt del PRD (turno 1: buzón completo, 13 llamadas a herramientas; turno 2: confirmación de msg-006): **63.201 tokens en la sesión** (entrada, salida y caché), según el contador `tokens` de `GET /api/sessions/:id`. Como cota superior (todo facturado como salida a $20/M) serían USD 1.26; con la mezcla real (casi todo es entrada, buena parte desde caché a $0.20/M) el costo queda en el rango de la tabla:
 
 | Escenario | Por buzón (6 mensajes) | Por contrato |
 |---|---|---|
