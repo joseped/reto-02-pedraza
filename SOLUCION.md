@@ -11,6 +11,8 @@
 
 ## 2. Arquitectura
 
+> **Diagrama interactivo:** [`docs/arquitectura.html`](docs/arquitectura.html), también publicado en **/arquitectura** dentro del link de la app. Al hacer clic en un nodo se ven su archivo, sus requisitos y sus principios. Incluye recorridos animados: el buzón paso a paso, la confirmación humana, la autoconfirmación bloqueada por la guardia y `demo.ts` sin modelo.
+
 ```
 ┌───────────────────────┐  POST /api/chat   ┌──────────────────────────────────────────────┐
 │ web/index.html        │ ────────────────▶ │ src/server.ts (Hono)                         │

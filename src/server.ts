@@ -4,7 +4,7 @@ import { serve } from "@hono/node-server"
 import { readFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
-import { Hono } from "hono"
+import { Hono, type Context } from "hono"
 import { z } from "zod"
 import { procesarMensaje, type Config } from "./agent/loop.ts"
 import { borrarSesiones, idSesionValido, obtenerSesion } from "./agent/sessions.ts"
@@ -88,10 +88,12 @@ app.post("/api/reset", (c) => {
 })
 
 // no-store: tras cada despliegue el navegador recibe el front actualizado.
-app.get("/", (c) => {
+const pagina = (archivo: string) => (c: Context) => {
   c.header("cache-control", "no-store")
-  return c.html(readFileSync(join(RAIZ, "web", "index.html"), "utf8"))
-})
+  return c.html(readFileSync(join(RAIZ, archivo), "utf8"))
+}
+app.get("/", pagina("web/index.html"))
+app.get("/arquitectura", pagina("docs/arquitectura.html"))
 
 const puerto = Number(env("PORT", "3000"))
 serve({ fetch: app.fetch, port: puerto }, () => console.log(`Agente de contratos en http://localhost:${puerto} · modelo ${MODELO}`))

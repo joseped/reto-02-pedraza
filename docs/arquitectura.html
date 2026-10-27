@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Arquitectura · Agente de contratos</title>
+<style>
+  :root { --bg:#f6f7f9; --panel:#fff; --line:#d5dae0; --txt:#1d2430; --muted:#6b7380; --brand:#14532d; --brand-2:#e8f5ec; --hi:#0f766e; --warn:#b45309; --err:#b91c1c; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--txt); display:grid; grid-template-columns:1fr 360px; grid-template-rows:auto 1fr; height:100vh; }
+  header { grid-column:1/3; background:var(--panel); border-bottom:1px solid var(--line); padding:10px 18px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  header h1 { font-size:15px; margin:0 12px 0 0; }
+  button { font:inherit; border:1px solid var(--line); background:var(--panel); border-radius:8px; padding:5px 11px; cursor:pointer; }
+  button.activo { background:var(--brand); color:#fff; border-color:var(--brand); }
+  #lienzo { overflow:auto; padding:10px; }
+  svg { width:100%; height:auto; min-width:900px; }
+  .banda { fill:#eef1f4; } .banda-txt { fill:var(--muted); font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; }
+  .nodo rect { fill:var(--panel); stroke:var(--line); stroke-width:1.5; rx:10; transition:all .25s; }
+  .nodo text { font-size:13px; fill:var(--txt); pointer-events:none; } .nodo .sub { font-size:11px; fill:var(--muted); }
+  .nodo { cursor:pointer; transition:opacity .25s; }
+  .nodo.externo rect { stroke-dasharray:5 4; } .nodo.control rect { fill:#fff7ed; stroke:var(--warn); }
+  .nodo.sel rect, .nodo.hi rect { stroke:var(--hi); stroke-width:3; } .nodo.bloq rect { stroke:var(--err); stroke-width:3; fill:#fee2e2; }
+  .arista path { fill:none; stroke:#9aa4b0; stroke-width:1.6; marker-end:url(#flecha); transition:all .25s; }
+  .arista text { font-size:11px; fill:var(--muted); paint-order:stroke; stroke:var(--bg); stroke-width:4px; }
+  .arista.hi path { stroke:var(--hi); stroke-width:3; stroke-dasharray:8 6; animation:fluir 0.8s linear infinite; marker-end:url(#flecha-hi); }
+  .arista.bloq path { stroke:var(--err); stroke-width:3; marker-end:url(#flecha-err); }
+  .tenue { opacity:.25; }
+  @keyframes fluir { to { stroke-dashoffset:-14; } }
+  aside { background:var(--panel); border-left:1px solid var(--line); padding:16px 18px; overflow:auto; }
+  aside h2 { font-size:16px; margin:0 0 4px; } aside h3 { font-size:12px; text-transform:uppercase; color:var(--muted); margin:14px 0 4px; letter-spacing:.05em; }
+  aside code { background:#f1f3f5; padding:1px 5px; border-radius:4px; font-size:12px; }
+  aside a { color:var(--hi); } .chip { display:inline-block; background:var(--brand-2); color:var(--brand); border-radius:999px; padding:1px 8px; margin:2px 3px 2px 0; font-size:12px; }
+  .paso { background:#f0fdfa; border-left:3px solid var(--hi); padding:8px 10px; border-radius:6px; margin:10px 0; }
+  .paso.bloq { background:#fef2f2; border-color:var(--err); }
+  .nav { display:flex; gap:8px; align-items:center; margin-top:8px; } .nav span { color:var(--muted); font-size:12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Agente de registro de contratos · arquitectura</h1>
+  <span style="color:var(--muted)">Recorridos:</span>
+  <button data-tour="buzon">① Procesar buzón</button>
+  <button data-tour="confirmar">② Confirmación humana</button>
+  <button data-tour="bloqueo">③ Autoconfirmación bloqueada</button>
+  <button data-tour="demo">④ demo.ts sin modelo</button>
+  <button id="limpiar">Vista general</button>
+</header>
+<div id="lienzo"><svg id="svg" viewBox="0 0 1220 710" role="img" aria-label="Diagrama de arquitectura"></svg></div>
+<aside id="panel"></aside>
+<script>
+const REPO = "https://github.com/joseped/reto-02-pedraza/blob/main/"
+const W = 160, H = 64
+
+const NODOS = {
+  analista: { x: 60, y: 62, t: "Analista", s: "usuaria principal", clase: "externo",
+    d: "Dueña del maestro de contratos. Conversa con el agente, confirma los campos dudosos y consume las alertas. Es quien toma la decisión final.", r: [], p: ["P3"] },
+  front: { x: 300, y: 62, t: "Front de chat", s: "web/index.html", f: ["web/index.html"],
+    d: "HTML y JS plano, sin compilación. Muestra el historial, el indicador de \"pensando\", una tarjeta por cada llamada a herramienta (argumentos y resultado) y un banner cuando el agente espera confirmación.", r: ["R-24"], p: ["P5"] },
+  api: { x: 540, y: 62, t: "API HTTP", s: "src/server.ts · Hono", f: ["src/server.ts"],
+    d: "POST /api/chat, GET /api/sessions/:id, GET /api/health (sin claves), POST /api/reset. Clave de acceso opcional (ACCESS_KEY) y un turno por sesión a la vez. Arma el system prompt quitando el frontmatter de los dos archivos Markdown.", r: ["R-23"], p: ["P7"] },
+  prompt: { x: 300, y: 190, t: "Comportamiento", s: "agent/prompt.md", f: ["agent/prompt.md"],
+    d: "System prompt: reglas no negociables (solo valores de herramientas, nunca autoconfirmar, no ofrecer lo que no se puede hacer), el flujo del buzón y el formato de respuesta.", r: ["R-25"], p: ["P1", "P2"] },
+  knowledge: { x: 300, y: 290, t: "Conocimiento", s: "src/knowledge/*.md", f: ["src/knowledge/registro-contratos.md"],
+    d: "Reglas de negocio RN1–RN7 en lenguaje natural: clasificación, confianza, estados de póliza y alertas. Está separado del comportamiento y de la ejecución.", r: ["R-25"], p: [] },
+  loop: { x: 540, y: 240, t: "Ciclo del agente", s: "src/agent/loop.ts", f: ["src/agent/loop.ts", "src/agent/sessions.ts"],
+    d: "prompt → modelo → herramientas → respuesta. Tope de iteraciones (25) y de tokens por sesión. Los errores del proveedor se traducen a lenguaje claro sin cerrar la sesión. needsConfirmation se calcula a partir de los resultados de las herramientas, no del texto del modelo. A la usuaria solo le llega el texto final.", r: ["R-20", "R-22"], p: ["P6", "P8"] },
+  guardia: { x: 540, y: 336, h: 50, t: "Guardia", s: "confirmación humana", clase: "control", f: ["src/agent/loop.ts"],
+    d: "Control del lado del servidor: confirmado=true solo se respeta si la revisión de ese mensaje quedó pendiente en un turno ANTERIOR y el mensaje actual de la usuaria es una afirmación. Si no, anula confirmado y descarta las correcciones. Lo prueba tests/guardia.test.ts.", r: ["R-21"], p: ["P3"] },
+  adapter: { x: 780, y: 240, t: "LlmAdapter", s: "src/llm/adapter.ts", f: ["src/llm/adapter.ts", "src/llm/anthropic.ts"],
+    d: "Interfaz propia enviar(system, turnos, herramientas). La implementación de Anthropic reenvía intacto el contenido del modelo, usa caché del prompt, fallback ante rechazos y timeout. Cambiar de proveedor no toca el ciclo.", r: [], p: ["P6"] },
+  claude: { x: 1020, y: 240, t: "Claude API", s: "claude-opus-5-5", clase: "externo",
+    d: "Proveedor del modelo, configurable con LLM_MODEL. La clave vive solo en una variable de entorno del backend: nunca en el repositorio, el front ni los logs.", r: [], p: ["P7"] },
+  registry: { x: 540, y: 430, t: "Registro de tools", s: "src/tools/registry.ts", f: ["src/tools/registry.ts"],
+    d: "Expone cada export como contratos_<export>. Convierte los esquemas zod a JSON Schema para el modelo y valida los argumentos antes de ejecutar (los IDs con ../ se rechazan).", r: [], p: ["P1"] },
+  tools: { x: 780, y: 430, t: "Herramientas", s: "src/tools/contratos.ts", f: ["src/tools/contratos.ts"],
+    d: "leer_buzon · extraer · validar · registrar · alertas. Devuelven siempre { ok, data } o { ok:false, error }, nunca lanzan excepciones y todo queda en out/log.jsonl. validar y registrar vuelven a extraer del documento original.", r: ["R-01", "R-13", "R-19"], p: ["P1", "P5", "P6"] },
+  core: { x: 1020, y: 430, t: "Núcleo determinista", s: "src/core/*", f: ["src/core/extractor.ts", "src/core/clasificador.ts", "src/core/maestro.ts", "src/core/alertas.ts", "src/core/reglas.ts"],
+    d: "Extractor con confianza por campo, clasificador RN1–RN4, maestro CSV con escritura atómica y alertas. Los parámetros de negocio viven en reglas.ts. Sin LLM: es reproducible y testeable.", r: ["R-03", "R-09", "R-16", "R-18"], p: ["P2", "P4"] },
+  tests: { x: 60, y: 600, t: "tests/", s: "LLM simulado", f: ["tests/guardia.test.ts"],
+    d: "npm test: prueba el ciclo con un LLM guionizado que intenta autoconfirmarse, argumentos maliciosos, error del proveedor y tope de iteraciones. No requiere clave.", r: ["R-20", "R-21"], p: ["P3"] },
+  demo: { x: 300, y: 600, t: "demo.ts", s: "sin modelo", f: ["demo.ts"],
+    d: "npm run demo: procesa los 6 mensajes llamando directamente a las herramientas y verifica cada criterio de aceptación de la spec. Sale con código 1 si alguno falla. Es determinista.", r: ["spec §3"], p: [] },
+  fixtures: { x: 780, y: 600, t: "fixtures/", s: "solo lectura", clase: "externo", f: ["fixtures/reto-02/maestro-contratos.csv"],
+    d: "Buzón (6 mensajes), maestro congelado al 2026-05-30 y catálogo de comerciales. Nunca se modifica: la primera ejecución copia el maestro a out/.", r: [], p: ["P4"] },
+  out: { x: 1020, y: 600, t: "out/", s: "SharePoint simulado", f: [],
+    d: "sharepoint/maestro-contratos.csv · sharepoint/Contratos/<año>/<cliente>/ · sharepoint/historial.jsonl (append-only) · procesados.json · alertas.md · log.jsonl · sessions/.", r: ["R-16", "R-18"], p: ["P4", "P5"] },
+}
+
+const ARISTAS = [
+  ["analista", "front", "mensaje"], ["front", "api", "POST /api/chat"], ["api", "loop", "procesarMensaje()"],
+  ["prompt", "loop", "system"], ["knowledge", "loop", "system"],
+  ["loop", "adapter", "enviar()"], ["adapter", "claude", "HTTPS"],
+  ["loop", "guardia", "tool_use"], ["guardia", "registry", ""], ["registry", "tools", "args válidos"], ["tools", "core", ""],
+  ["core", "fixtures", "lee"], ["core", "out", "escribe"],
+  ["demo", "tools", "llamada directa"], ["tests", "loop", "LLM simulado"],
+]
+
+const TOURS = {
+  buzon: [
+    ["analista>front", "front>api"], "La analista envía el prompt del PRD: procesar el buzón con fecha 2026-09-03.",
+    ["api>loop", "prompt>loop", "knowledge>loop"], "El servidor abre el turno con el system prompt (comportamiento + conocimiento) y el historial de la sesión.",
+    ["loop>adapter", "adapter>claude"], "El modelo decide el orden de las llamadas: contratos_leer_buzon y luego contratos_validar por cada mensaje.",
+    ["loop>guardia", "guardia>registry", "registry>tools", "tools>core", "core>fixtures"], "Cada llamada se valida con zod. Las herramientas leen el documento original: los valores nunca salen del modelo.",
+    ["core>out"], "msg-001 a 005: dos altas, una actualización por otrosí, un duplicado y un rechazo. Escritura atómica, con historial y registro de procesados. msg-006 queda en revisión con 4 campos con confianza menor a 0.8.",
+    ["loop>adapter", "api>loop", "front>api"], "needsConfirmation=true se deriva del resultado de validar, no del texto. El front resalta el mensaje con el banner de confirmación y el agente termina con una pregunta.",
+  ],
+  confirmar: [
+    ["analista>front", "front>api", "api>loop"], "Turno siguiente: \"Confirmo el valor 0 y la fecha fin 2027-08-31\".",
+    ["loop>adapter", "adapter>claude"], "El modelo convierte lo dictado en correcciones tipadas: { fecha_fin: \"2027-08-31\" }.",
+    ["loop>guardia"], "Guardia: la revisión quedó pendiente en un turno anterior ✓ y el mensaje es una afirmación ✓. Se respeta confirmado=true.",
+    ["guardia>registry", "registry>tools", "tools>core", "core>out"], "registrar escribe CM-2026-03 con confirmado_por: usuario en el historial. Luego regenera las alertas: pólizas pendientes pasan de 3 a 4.",
+  ],
+  bloqueo: [
+    ["loop>adapter", "adapter>claude"], "Supuesto adversarial: en el mismo turno en que aparece la revisión, el modelo intenta registrar msg-006 con confirmado=true y valor 999.",
+    ["!loop>guardia", "!guardia"], "La guardia detecta que la revisión surgió en ESTE turno: anula confirmado y descarta las correcciones antes de ejecutar.",
+    ["guardia>registry", "registry>tools", "!tools"], "registrar responde \"requiere revisión\" y el maestro no se toca. La salida depende del control, no de que el modelo obedezca. Lo cubre el primer caso de tests/guardia.test.ts.",
+  ],
+  demo: [
+    ["demo>tools"], "npm run demo llama a las herramientas directamente, sin modelo, sin clave y sin red.",
+    ["tools>core", "core>fixtures", "core>out"], "Procesa los 6 mensajes, simula la confirmación de msg-006 y genera las alertas.",
+    ["!demo"], "Verifica cada criterio de aceptación de specs/spec.md §3 (✓/✗) y sale con código 1 si alguno falla. Dos ejecuciones dan la misma salida.",
+  ],
+}
+
+const svg = document.getElementById("svg"), panel = document.getElementById("panel")
+const NS = "http://www.w3.org/2000/svg"
+const el = (tag, attrs = {}, padre = svg) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); padre.append(e); return e }
+const alto = (n) => n.h ?? H
+
+function dibujar() {
+  const defs = el("defs")
+  for (const [id, color] of [["flecha", "#9aa4b0"], ["flecha-hi", "#0f766e"], ["flecha-err", "#b91c1c"]]) {
+    const m = el("marker", { id, viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" }, defs)
+    el("path", { d: "M0,0 L10,5 L0,10 z", fill: color }, m)
+  }
+  for (const [y, h, t] of [[40, 110, "Interfaz"], [170, 230, "Agente"], [410, 110, "Ejecución"], [580, 110, "Datos y verificación"]]) {
+    el("rect", { x: 10, y, width: 1200, height: h, rx: 12, class: "banda" })
+    el("text", { x: 22, y: y + 18, class: "banda-txt" }).textContent = t
+  }
+  const etiquetas = []
+  for (const [a, b, etiqueta] of ARISTAS) {
+    const g = el("g", { class: "arista", id: `e-${a}>${b}` })
+    const [x1, y1, x2, y2] = recortar(NODOS[a], NODOS[b])
+    el("path", { d: `M${x1},${y1} L${x2},${y2}` }, g)
+    if (etiqueta) etiquetas.push([g, x1, y1, x2, y2, etiqueta])
+  }
+  for (const [id, n] of Object.entries(NODOS)) {
+    const g = el("g", { class: `nodo ${n.clase ?? ""}`, id: `n-${id}`, tabindex: 0 })
+    el("rect", { x: n.x, y: n.y, width: W, height: alto(n) }, g)
+    el("text", { x: n.x + 12, y: n.y + (alto(n) > 55 ? 26 : 22), "font-weight": 600 }, g).textContent = n.t
+    el("text", { x: n.x + 12, y: n.y + (alto(n) > 55 ? 45 : 39), class: "sub" }, g).textContent = n.s
+    g.onclick = () => mostrarNodo(id)
+    g.onkeydown = (e) => e.key === "Enter" && mostrarNodo(id)
+  }
+  // Las etiquetas van en una capa por encima de los nodos para que ninguna quede tapada.
+  for (const [g, x1, y1, x2, y2, texto] of etiquetas) {
+    const vertical = Math.abs(x2 - x1) < 4
+    const t = el("text", vertical ? { x: x1 + 6, y: (y1 + y2) / 2 + 4 } : { x: (x1 + x2) / 2, y: (y1 + y2) / 2 - 7, "text-anchor": "middle" }, g)
+    t.textContent = texto
+    svg.append(g)
+  }
+}
+
+/** Segmento entre los bordes de dos rectángulos, a lo largo de la línea entre sus centros. */
+function recortar(a, b) {
+  const ca = [a.x + W / 2, a.y + alto(a) / 2], cb = [b.x + W / 2, b.y + alto(b) / 2]
+  const borde = (c, n, dx, dy) => { const s = Math.min(Math.abs(W / 2 / (dx || 1e-9)), Math.abs(alto(n) / 2 / (dy || 1e-9))); return [c[0] + dx * s, c[1] + dy * s] }
+  const dx = cb[0] - ca[0], dy = cb[1] - ca[1]
+  return [...borde(ca, a, dx, dy), ...borde(cb, b, -dx, -dy)]
+}
+
+function limpiar() {
+  document.querySelectorAll(".hi,.bloq,.sel,.tenue").forEach((e) => e.classList.remove("hi", "bloq", "sel", "tenue"))
+}
+
+function resaltar(claves) {
+  limpiar()
+  document.querySelectorAll(".nodo,.arista").forEach((e) => e.classList.add("tenue"))
+  for (const k of claves) {
+    const bloq = k.startsWith("!"), c = k.replace("!", "")
+    const ids = c.includes(">") ? [`e-${c}`, `n-${c.split(">")[0]}`, `n-${c.split(">")[1]}`] : [`n-${c}`]
+    for (const id of ids) { const e = document.getElementById(id); if (!e) continue; e.classList.remove("tenue"); e.classList.add(bloq && (id === ids[0] || !c.includes(">")) ? "bloq" : "hi") }
+  }
+}
+
+function mostrarNodo(id) {
+  const n = NODOS[id]
+  limpiar(); document.getElementById(`n-${id}`).classList.add("sel")
+  const archivos = (n.f ?? []).map((f) => `<div><a href="${REPO}${f}" target="_blank" rel="noopener">${f}</a></div>`).join("") || "<div>—</div>"
+  panel.innerHTML = `<h2>${n.t}</h2><div style="color:var(--muted)">${n.s}</div><p>${n.d}</p>
+    <h3>Archivos</h3>${archivos}
+    <h3>Requisitos de la spec</h3>${n.r.map((r) => `<span class="chip">${r}</span>`).join("") || "—"}
+    <h3>Principios de la constitución</h3>${n.p.map((p) => `<span class="chip">${p}</span>`).join("") || "—"}`
+}
+
+let tour = null, paso = 0
+function mostrarPaso() {
+  const pasos = TOURS[tour], total = pasos.length / 2, claves = pasos[paso * 2], texto = pasos[paso * 2 + 1]
+  resaltar(claves)
+  const bloq = claves.some((k) => k.startsWith("!"))
+  panel.innerHTML = `<h2>${document.querySelector(`[data-tour=${tour}]`).textContent}</h2>
+    <div class="paso ${bloq ? "bloq" : ""}"><b>Paso ${paso + 1} de ${total}.</b> ${texto}</div>
+    <div class="nav"><button id="ant" ${paso === 0 ? "disabled" : ""}>← Anterior</button><button id="sig" ${paso === total - 1 ? "disabled" : ""}>Siguiente →</button><span>también con ← →</span></div>`
+  document.getElementById("ant").onclick = () => { paso--; mostrarPaso() }
+  document.getElementById("sig").onclick = () => { paso++; mostrarPaso() }
+}
+
+function general() {
+  tour = null; limpiar()
+  document.querySelectorAll("[data-tour]").forEach((b) => b.classList.remove("activo"))
+  panel.innerHTML = `<h2>Vista general</h2><p><b>El modelo conversa, el código decide.</b> El LLM orquesta y explica. La extracción, la clasificación y el registro son deterministas, y la confirmación humana la impone el servidor.</p>
+    <h3>Cómo leer el diagrama</h3><p>Haz clic en un nodo para ver su archivo, su responsabilidad y los requisitos que cubre. Usa los recorridos de arriba para seguir un flujo paso a paso.</p>
+    <h3>Separación que evalúa el PRD</h3><p><span class="chip">comportamiento</span> agent/prompt.md<br><span class="chip">conocimiento</span> src/knowledge/<br><span class="chip">ejecución</span> src/tools/ + src/core/</p>
+    <h3>Leyenda</h3><p>Borde punteado: fuera del sistema. Naranja: control de gobierno. Rojo: acción bloqueada.</p>`
+}
+
+document.querySelectorAll("[data-tour]").forEach((b) => (b.onclick = () => {
+  document.querySelectorAll("[data-tour]").forEach((x) => x.classList.remove("activo")); b.classList.add("activo")
+  tour = b.dataset.tour; paso = 0; mostrarPaso()
+}))
+document.getElementById("limpiar").onclick = general
+document.addEventListener("keydown", (e) => {
+  if (!tour) return
+  const total = TOURS[tour].length / 2
+  if (e.key === "ArrowRight" && paso < total - 1) { paso++; mostrarPaso() }
+  if (e.key === "ArrowLeft" && paso > 0) { paso--; mostrarPaso() }
+})
+dibujar(); general()
+</script>
+</body>
+</html>
