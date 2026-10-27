@@ -33,5 +33,5 @@ Cada tarea cita los requisitos que cubre. Se marca `[x]` al terminar y se hace c
 - [ ] T18 Redeploy + prueba con el prompt del PRD §11
 
 ## Bloque 7 · Documentación
-- [ ] T19 `README.md`
-- [ ] T20 `SOLUCION.md`: 11 secciones + regla de gobierno + mapa NIST AI RMF / ISO 42001 + trazabilidad de requisitos a código
+- [x] T19 `README.md`
+- [x] T20 `SOLUCION.md`: 11 secciones + regla de gobierno + mapa NIST AI RMF / ISO 42001 + trazabilidad de requisitos a código
