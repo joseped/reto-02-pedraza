@@ -3,22 +3,22 @@
 Cada tarea cita los requisitos que cubre. Se marca `[x]` al terminar y se hace commit por bloque.
 
 ## Bloque 1 · Esqueleto y deploy temprano
-- [ ] T01 `package.json`, `tsconfig.json` (strict, sin `any`), `.gitignore`, `.env.example`
+- [x] T01 `package.json`, `tsconfig.json` (strict, sin `any`), `.gitignore`, `.env.example`
 - [ ] T02 `src/server.ts` con `/api/health` + `web/index.html` como placeholder
 - [ ] T03 `Dockerfile` + deploy de prueba (requiere la cuenta del usuario)
 
 ## Bloque 2 · Núcleo de extracción
-- [ ] T04 `core/numeros.ts`, `core/fechas.ts`, `core/texto.ts` — R-05, R-06
-- [ ] T05 `core/schema.ts` — esquemas zod
-- [ ] T06 `core/extractor.ts` — R-03, R-04, R-07, R-08, R-12
-- [ ] T07 Verificación de la extracción sobre los 6 mensajes contra spec §3
+- [x] T04 `core/numeros.ts`, `core/fechas.ts`, `core/texto.ts` — R-05, R-06
+- [x] T05 `core/schema.ts` — esquemas zod
+- [x] T06 `core/extractor.ts` — R-03, R-04, R-07, R-08, R-12
+- [x] T07 Verificación de la extracción sobre los 6 mensajes contra spec §3
 
 ## Bloque 3 · Herramientas y demo
-- [ ] T08 `core/maestro.ts`, `core/store.ts` — R-16, P4, P5
-- [ ] T09 `core/clasificador.ts` — R-09, R-10, R-11
-- [ ] T10 `core/alertas.ts` — R-18
-- [ ] T11 `tools/contratos.ts` + `tools/registry.ts` — R-01, R-02, R-13..R-15, R-17, R-19
-- [ ] T12 `demo.ts` — spec §3 completa, incluida la 2.ª llamada a msg-006
+- [x] T08 `core/maestro.ts`, `core/store.ts` — R-16, P4, P5
+- [x] T09 `core/clasificador.ts` — R-09, R-10, R-11
+- [x] T10 `core/alertas.ts` — R-18
+- [x] T11 `tools/contratos.ts` + `tools/registry.ts` — R-01, R-02, R-13..R-15, R-17, R-19
+- [x] T12 `demo.ts` — spec §3 completa, incluida la 2.ª llamada a msg-006
 
 ## Bloque 4 · Agente
 - [ ] T13 `llm/adapter.ts`, `llm/anthropic.ts` (timeout)
