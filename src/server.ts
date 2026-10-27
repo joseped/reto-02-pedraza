@@ -87,7 +87,11 @@ app.post("/api/reset", (c) => {
   return c.json({ ok: true })
 })
 
-app.get("/", (c) => c.html(readFileSync(join(RAIZ, "web", "index.html"), "utf8")))
+// no-store: tras cada despliegue el navegador recibe el front actualizado.
+app.get("/", (c) => {
+  c.header("cache-control", "no-store")
+  return c.html(readFileSync(join(RAIZ, "web", "index.html"), "utf8"))
+})
 
 const puerto = Number(env("PORT", "3000"))
 serve({ fetch: app.fetch, port: puerto }, () => console.log(`Agente de contratos en http://localhost:${puerto} · modelo ${MODELO}`))

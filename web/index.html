@@ -93,6 +93,10 @@ const bajar = () => (chat.scrollTop = chat.scrollHeight)
 async function api(ruta, opciones = {}) {
   const res = await fetch(ruta, { ...opciones, headers: { "content-type": "application/json", "x-access-key": clave, ...(opciones.headers || {}) } })
   if (res.status === 401) { clave = prompt("Clave de acceso:") || ""; localStorage.setItem("clave", clave); return api(ruta, opciones) }
+  // Durante un despliegue o al despertar (plan gratuito), el proxy responde HTML con 502/503.
+  if (!(res.headers.get("content-type") || "").includes("json")) {
+    throw new Error(res.status >= 500 ? "El servidor se está iniciando o reiniciando. Espera un minuto y vuelve a enviar el mensaje; no se procesó nada." : `Respuesta inesperada del servidor (${res.status}).`)
+  }
   return res.json()
 }
 
@@ -101,7 +105,7 @@ async function enviar(texto) {
   pintarUsuario(texto); entrada.value = ""; enviarBtn.disabled = true
   const p = document.createElement("div"); p.className = "msg agente pensando"; p.textContent = "El agente está pensando y usando herramientas…"; chat.append(p); bajar()
   try { pintarAgente(await api("/api/chat", { method: "POST", body: JSON.stringify({ sessionId: sesion, message: texto }) })) }
-  catch { pintarAgente({ reply: "", error: "No hay conexión con el servidor." }) }
+  catch (e) { pintarAgente({ reply: "", error: e instanceof Error && !(e instanceof TypeError) ? e.message : "No hay conexión con el servidor. Revisa tu red y vuelve a intentar." }) }
   finally { p.remove(); enviarBtn.disabled = false; entrada.focus() }
 }
 
