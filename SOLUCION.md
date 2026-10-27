@@ -1,7 +1,7 @@
 # SOLUCIÓN · Agente de registro de contratos vigentes
 
 > Reto técnico 02 · Periferia IT Group · José Aristides Pedraza González
-> La solución se construyó con **Spec-Driven Development**: [`specs/constitution.md`](specs/constitution.md) → [`spec.md`](specs/spec.md) → [`plan.md`](specs/plan.md) → [`tasks.md`](specs/tasks.md). Cada requisito (`R-xx`) es trazable hasta el código y hasta `demo.ts`.
+> La solución se construyó con **Spec-Driven Development**: [`specs/constitution.md`](specs/constitution.md) → [`spec.md`](specs/spec.md) → [`plan.md`](specs/plan.md) → [`tasks.md`](specs/tasks.md). Cada requisito (`R-xx`) es trazable hasta el código y las pruebas. La evidencia de las pruebas, incluida una corrida con el modelo real, está en [`docs/evidencia/`](docs/evidencia/README.md).
 
 ---
 
@@ -19,7 +19,8 @@
 │ · historial           │ ◀──────────────── │  └ src/agent/loop.ts   ciclo + topes +       │
 │ · tarjetas de tools   │  reply, toolCalls,│                        GUARDIA de confirmación│
 │ · banner "confirmar"  │  needsConfirmation│  └ src/llm/adapter.ts  interfaz LlmAdapter    │
-└───────────────────────┘                   │      └ anthropic.ts    implementación         │
+└───────────────────────┘                   │      ├ anthropic.ts    producción (Claude)    │
+                                            │      └ simulado.ts     QA sin clave           │
                                             │  └ src/tools/registry.ts  zod → JSON Schema    │
                                             │      └ contratos.ts    5 herramientas          │
                                             │          └ src/core/   lógica determinista     │
@@ -46,7 +47,8 @@ Cambiar una regla de negocio (umbral de confianza, días de alerta, fecha de cor
 
 1. Añade el mensaje de la usuaria al historial e incrementa el turno.
 2. Repite: envía al modelo el *system prompt* (prompt + conocimiento), el historial y las herramientas. Para cada `tool_use`: valida los argumentos con zod (si fallan, el error vuelve al modelo sin ejecutar nada), aplica la **guardia**, ejecuta, registra en `out/log.jsonl` y devuelve el resultado.
-3. Se detiene cuando el modelo responde sin herramientas, al llegar al **tope de iteraciones** (25, configurable; responde con lo hecho y lo pendiente), cuando se agota el **presupuesto de tokens de la sesión** o ante un **error del proveedor**, que se traduce a lenguaje claro sin cerrar la sesión.
+3. A la usuaria solo le llega el **texto final** del modelo; las notas que escribe entre llamadas no se muestran (R-26).
+4. Se detiene cuando el modelo responde sin herramientas, al llegar al **tope de iteraciones** (25, configurable; responde con lo hecho y lo pendiente), cuando se agota el **presupuesto de tokens de la sesión** o ante un **error del proveedor**, que se traduce a lenguaje claro sin cerrar la sesión.
 
 **Confirmación humana en tres capas.** El prompt prohíbe autoconfirmar, pero no confío solo en él:
 
@@ -67,7 +69,7 @@ Cambiar una regla de negocio (umbral de confianza, días de alerta, fecha de cor
 | Por qué | El trabajo del modelo es **orquestar y explicar**, no extraer. Necesito fiabilidad para seguir el flujo, no llamar `registrar` antes de tiempo y redactar preguntas de confirmación precisas. Opus 5.5 ofrece la mejor fiabilidad en uso de herramientas a un precio de $4 / $20 por millón de tokens (entrada / salida) |
 | Configuración | `effort: medium`, prompt de sistema con caché (`cache_control`) y **fallback del lado del servidor** ante rechazos (`fallbacks: "default"`), para que un falso positivo del filtro de seguridad no rompa la demo |
 
-**Costo.** Medición real con el prompt del PRD (turno 1: buzón completo, 13 llamadas a herramientas; turno 2: confirmación de msg-006): **63.201 tokens en la sesión** (entrada, salida y caché), según el contador `tokens` de `GET /api/sessions/:id`. Como cota superior (todo facturado como salida a $20/M) serían USD 1.26; con la mezcla real (casi todo es entrada, buena parte desde caché a $0.20/M) el costo queda en el rango de la tabla:
+**Costo.** Medición real con el prompt del PRD (turno 1: buzón completo, 13 llamadas a herramientas; turno 2: confirmación de msg-006 y regeneración de alertas): **entre 63 y 79 mil tokens por sesión** en las corridas medidas (entrada, salida y caché), según el contador `tokens` de `GET /api/sessions/:id`. La última está documentada en [`docs/evidencia/modelo-real/`](docs/evidencia/modelo-real/transcripcion.md). Como cota superior (todo facturado como salida a $20/M) serían unos USD 1.60; con la mezcla real (casi todo es entrada, buena parte desde caché a $0.20/M) el costo queda en el rango de la tabla:
 
 | Escenario | Por buzón (6 mensajes) | Por contrato |
 |---|---|---|
@@ -116,10 +118,12 @@ Con 10 a 30 contratos al mes, el costo es inferior a USD 5 mensuales. El costo r
 | D5 | Node 22 + tsx, Hono y HTML plano | Bun, Express, React | Menos piezas y arranque en un comando. El PRD permite Node 20+ |
 | D6 | Render (servidor con estado) | Vercel | En serverless, cada petición puede caer en otra instancia y el disco es efímero: la confirmación del turno siguiente se perdería. Vercel exigiría Redis |
 | D7 | `estado_poliza → pendiente` cuando un otrosí exige ampliar garantías | Dejar la póliza `vigente` | La póliza vigente no cubre el nuevo plazo. Mejor una alerta de más que una garantía vencida |
+| D8 | **Proveedor `simulado`** para el QA en navegador | Usar el modelo real en cada corrida | Gratis, sin clave y determinista; además demuestra que cambiar de proveedor no toca el ciclo. El modelo real se valida aparte, con una corrida documentada (`e2e/live.spec.ts`) |
+| D9 | Pruebas Playwright en el repositorio, con el Chrome instalado | QA exploratorio con Playwright MCP | Quedan reproducibles (`npm run e2e`) y sirven como evidencia y regresión. El MCP no estaba disponible en la sesión de desarrollo |
 
 ## 8. Supuestos
 
-1. **msg-006, firma sin día.** "En el mes de agosto de 2026" se interpreta como inicio el 2026-08-01, con confianza 0.5. El PRD espera revisión de `valor` y `fecha_fin`; **también pongo `fecha_inicio` en revisión** porque es igual de incierta. Si la usuaria confirma "fin 2027-08-31", se registra lo que ella dicta.
+1. **msg-006, firma sin día.** "En el mes de agosto de 2026" se interpreta como inicio el 2026-08-01, con confianza 0.5. El PRD espera revisión de `valor` y `fecha_fin`; **también pongo `fecha_inicio` en revisión** porque es igual de incierta. Con la confirmación del PRD (*"confirmo el valor 0 y la fecha fin 2027-08-31"*) se registra en un solo paso: se usa la fecha que ella dicta, se acepta el inicio propuesto que se le mostró (R-27) y el agente advierte que esa fecha fin no cuadra con un plazo de 12 meses.
 2. **msg-006, póliza condicional.** Se propone `requiere_poliza = true`, `cumplimiento`, `pendiente`, con confianza 0.6 y en revisión.
 3. **Moneda de un contrato sin valor.** Se toma la moneda nombrada en el texto (aquí COP, en la cláusula de garantías). Si no aparece, queda `null`.
 4. **Comercial desconocido.** Se registra como `<email> (no registrado)`; no se infiere el nombre a partir de la firma del correo.
@@ -139,16 +143,16 @@ Con 10 a 30 contratos al mes, el costo es inferior a USD 5 mensuales. El costo r
 | HU-5 Alertas | Hecho, más una sección extra | `out/alertas.md` | Envío programado a gerencia (correo o Teams) |
 | HU-6 Errores | Hecho | `{ ok:false }` en todas las herramientas; tests | Reintentos y cola de mensajes fallidos |
 | Agente, API, front | Hecho | `src/agent`, `src/server.ts`, `web/` | Autenticación SSO y roles |
-| QA end-to-end ([evidencia](docs/evidencia/README.md)) | Hecho | `npm run e2e`: 13 escenarios de Playwright en Chrome (flujo PRD, sesión, reinicio, clave de acceso, XSS, error de arranque, móvil, diagrama). Detectó y se corrigió un desborde en móvil | Correr en CI en cada push |
+| QA end-to-end ([evidencia](docs/evidencia/README.md)) | Hecho | `npm run e2e`: 13 escenarios de Playwright en Chrome (flujo PRD, sesión, reinicio, clave de acceso, XSS, error de arranque, móvil, diagrama) y una corrida con el modelo real. Detectó dos defectos del front (desborde en móvil, mensajes recortados), ya corregidos y con prueba de regresión | Correr en CI en cada push |
 | Bonus `modulo/` | No hecho | El prompt y el conocimiento ya tienen el frontmatter requerido | Empaquetar reutilizando los mismos archivos |
 
 ## 10. Uso de IA
 
 | Asistente | Para qué | Qué descarté o corregí |
 |---|---|---|
-| **Claude Code (Claude Opus 5.5)** | Análisis de los fixtures para encontrar trampas, redacción de la especificación SDD, generación del código, de `demo.ts` y de los tests, y borrador de esta documentación | (1) Su primera sugerencia de despliegue incluía Vercel, que descarté por el estado entre peticiones (D6). (2) Propuso Bun, que reemplacé por Node porque no estaba instalado y el PRD lo permite. (3) La primera versión dejaba la moneda del contrato marco con confianza 0.5 sin justificación; la ajusté para tomar la moneda solo si el texto la nombra. (4) Un criterio de `demo.ts` tenía un error de precedencia que daba un falso fallo; lo corregí. (5) Endurecí la confirmación: no basta con el prompt, se agregó la guardia en el servidor. |
+| **Claude Code (Claude Opus 5.5)** | Análisis de los fixtures para encontrar trampas, redacción de la especificación SDD, generación del código, de `demo.ts`, de los tests y de las pruebas E2E, el diagrama de arquitectura y el borrador de esta documentación | (1) Propuso Bun, que reemplacé por Node porque no estaba instalado y el PRD lo permite. (2) Evaluamos Vercel para el despliegue y lo descartamos por el estado entre peticiones (D6). (3) La primera versión dejaba la moneda del contrato marco con confianza 0.5 sin justificación; la ajusté para tomar la moneda solo si el texto la nombra. (4) Un criterio de `demo.ts` tenía un error de precedencia que daba un falso fallo; lo corregí. (5) Endurecí la confirmación: no basta con el prompt, se agregó la guardia en el servidor. (6) En las pruebas con el modelo real y en producción encontré conductas que corregí: notas internas en inglés en la respuesta, una oferta de corregir lo que el agente no puede corregir y alertas que no se regeneraban (spec §6). (7) El QA y la revisión de la evidencia encontraron dos defectos visuales que la demo sin navegador no detectaba. |
 
-Todas las decisiones de interpretación (sección 8) las revisé y aprobé antes de implementarlas, y puedo explicar cada línea del código entregado.
+Todas las decisiones de interpretación (sección 8) las revisé y aprobé antes de implementarlas, y puedo explicar cada línea del código entregado. Cada cambio posterior a la primera entrega quedó registrado en la spec (§6, historial de cambios) y en las tareas (bloques 8 a 11).
 
 ## 11. Riesgos de producción y mitigación
 

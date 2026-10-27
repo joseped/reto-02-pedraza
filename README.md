@@ -17,11 +17,13 @@ npm install && npm run dev  # http://localhost:3000
 ```
 Sin clave, el servidor arranca igual: el chat avisa que falta la clave y `demo.ts` funciona.
 
-## Verificación sin modelo
+## Verificación
 ```bash
-npm run demo   # procesa los 6 mensajes y verifica los criterios de aceptación (sale con código 1 si alguno falla)
-npm test       # ciclo del agente con un LLM simulado: guardia de confirmación, errores, topes
-npm run e2e    # QA end-to-end con Playwright (usa tu Chrome; servidor con LLM_PROVIDER=simulado)
+npm run demo                  # herramientas sin modelo: criterios de aceptación de la spec (sale con código 1 si alguno falla)
+npm test                      # ciclo del agente con un LLM simulado: guardia de confirmación, errores, topes
+npm run e2e                   # QA en navegador con Playwright (usa tu Chrome; servidor con LLM_PROVIDER=simulado)
+npm run evidencia             # regenera docs/evidencia/ con las tres suites y capturas
+npm run evidencia -- --live   # además, el flujo del PRD con el modelo real (usa la clave de .env; unos USD 0.30)
 ```
 `npm run e2e` levanta el servidor con el proveedor `simulado`: un guion determinista que llama a las herramientas reales, sin clave ni costo. Cubre el flujo del PRD en el navegador (banner, tarjetas de herramientas, confirmación), la sesión al recargar, el reinicio, la clave de acceso, el escape de HTML (XSS), el error de arranque del servidor, la vista móvil y el diagrama de arquitectura. Reporte HTML en `out/e2e-report/`.
 `demo.ts` limpia `out/` al inicio y usa `FECHA_HOY=2026-09-03`, así que es determinista.
@@ -46,13 +48,9 @@ npm run e2e    # QA end-to-end con Playwright (usa tu Chrome; servidor con LLM_P
 | `GET` | `/api/sessions/:id` | Historial visible, turno, tokens usados y mensajes pendientes de confirmación |
 | `GET` | `/api/health` | `{ ok, provider, model, llm_configurado, protegido }` (sin claves) |
 | `POST` | `/api/reset` | Borra `out/` y las sesiones para repetir la demo |
+| `GET` | `/arquitectura` | Diagrama de arquitectura interactivo |
 
 Si `ACCESS_KEY` está definida, `/api/*` (salvo health) exige el encabezado `x-access-key`.
-
-## Despliegue (Render)
-1. Sube el repositorio a GitHub.
-2. En Render: **New → Blueprint** y selecciona el repositorio (usa `render.yaml` y el `Dockerfile`).
-3. En el panel, define `ANTHROPIC_API_KEY` (y `ACCESS_KEY` si quieres proteger el link).
 
 ## Estructura
 ```
@@ -60,10 +58,14 @@ agent/prompt.md                       comportamiento (system prompt)
 src/knowledge/registro-contratos.md   conocimiento del proceso
 src/tools/contratos.ts                herramientas (contratos_*) · registry.ts las expone al modelo
 src/core/                             lógica determinista: extractor, clasificador, maestro, alertas
-src/llm/                              adaptador del proveedor (interfaz + Anthropic)
+src/llm/                              adaptador del proveedor (interfaz + Anthropic + simulado)
 src/agent/                            ciclo del agente y sesiones
 src/server.ts                         API + front estático
 web/index.html                        chat
-demo.ts · tests/                      verificación sin modelo
+src/llm/simulado.ts                   proveedor simulado para QA (LLM_PROVIDER=simulado)
+demo.ts · tests/ · e2e/               verificación: herramientas, ciclo del agente, navegador
+scripts/evidencia.sh                  genera docs/evidencia/
+docs/arquitectura.html                diagrama interactivo (también en /arquitectura)
+docs/evidencia/                       evidencia de pruebas, incluida una corrida con el modelo real
 specs/                                constitución, spec, plan y tareas (SDD)
 ```
