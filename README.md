@@ -20,13 +20,16 @@ Sin clave, el servidor arranca igual: el chat avisa que falta la clave y `demo.t
 ```bash
 npm run demo   # procesa los 6 mensajes y verifica los criterios de aceptación (sale con código 1 si alguno falla)
 npm test       # ciclo del agente con un LLM simulado: guardia de confirmación, errores, topes
+npm run e2e    # QA end-to-end con Playwright (usa tu Chrome; servidor con LLM_PROVIDER=simulado)
 ```
+`npm run e2e` levanta el servidor con el proveedor `simulado`: un guion determinista que llama a las herramientas reales, sin clave ni costo. Cubre el flujo del PRD en el navegador (banner, tarjetas de herramientas, confirmación), la sesión al recargar, el reinicio, la clave de acceso, el escape de HTML (XSS), el error de arranque del servidor, la vista móvil y el diagrama de arquitectura. Reporte HTML en `out/e2e-report/`.
 `demo.ts` limpia `out/` al inicio y usa `FECHA_HOY=2026-09-03`, así que es determinista.
 
 ## Variables de entorno
 | Variable | Obligatoria | Por defecto | Uso |
 |---|---|---|---|
 | `ANTHROPIC_API_KEY` | Para el chat | — | Clave del modelo. Solo vive en el backend |
+| `LLM_PROVIDER` | No | `anthropic` | `simulado` = guion determinista sin clave (QA) |
 | `LLM_MODEL` | No | `claude-opus-5-5` | Modelo (por ejemplo, `claude-sonnet-5-5` para bajar costo) |
 | `LLM_TIMEOUT_MS` | No | `90000` | Timeout por llamada al modelo |
 | `MAX_ITERACIONES` | No | `25` | Tope de pasos herramienta → modelo por turno |

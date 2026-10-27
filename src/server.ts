@@ -11,6 +11,7 @@ import { borrarSesiones, idSesionValido, obtenerSesion } from "./agent/sessions.
 import { limpiarOut, type Ctx } from "./core/store.ts"
 import type { LlmAdapter } from "./llm/adapter.ts"
 import { AnthropicAdapter } from "./llm/anthropic.ts"
+import { SimuladoAdapter } from "./llm/simulado.ts"
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..")
 const env = (k: string, d: string) => process.env[k] ?? d
@@ -19,7 +20,8 @@ const cfg: Config = {
   maxIteraciones: Number(env("MAX_ITERACIONES", "25")),
   maxTokensSesion: Number(env("MAX_TOKENS_SESION", "400000")),
 }
-const MODELO = env("LLM_MODEL", "claude-opus-5-5")
+const PROVEEDOR = env("LLM_PROVIDER", "anthropic")
+const MODELO = PROVEEDOR === "simulado" ? "guion-determinista" : env("LLM_MODEL", "claude-opus-5-5")
 const CLAVE_ACCESO = process.env.ACCESS_KEY
 
 /** Comportamiento (agent/prompt.md) + conocimiento (src/knowledge/), sin el frontmatter. */
@@ -30,10 +32,12 @@ const SYSTEM = [
   sinFrontmatter(readFileSync(join(RAIZ, "src", "knowledge", "registro-contratos.md"), "utf8")),
 ].join("\n\n")
 
+/** Selección del proveedor: el ciclo del agente no cambia (PRD §6.1). "simulado" es para QA sin clave. */
+const llmConfigurado = PROVEEDOR === "simulado" || Boolean(process.env.ANTHROPIC_API_KEY)
 let llm: LlmAdapter | null = null
 const obtenerLlm = (): LlmAdapter | null => {
-  if (!process.env.ANTHROPIC_API_KEY) return null
-  llm ??= new AnthropicAdapter(MODELO, Number(env("LLM_TIMEOUT_MS", "90000")))
+  if (!llmConfigurado) return null
+  llm ??= PROVEEDOR === "simulado" ? new SimuladoAdapter() : new AnthropicAdapter(MODELO, Number(env("LLM_TIMEOUT_MS", "90000")))
   return llm
 }
 
@@ -46,7 +50,7 @@ app.use("/api/*", async (c, next) => {
   return next()
 })
 
-app.get("/api/health", (c) => c.json({ ok: true, provider: "anthropic", model: MODELO, llm_configurado: Boolean(process.env.ANTHROPIC_API_KEY), protegido: Boolean(CLAVE_ACCESO) }))
+app.get("/api/health", (c) => c.json({ ok: true, provider: PROVEEDOR, model: MODELO, llm_configurado: llmConfigurado, protegido: Boolean(CLAVE_ACCESO) }))
 
 const CuerpoChat = z.object({ sessionId: z.string().refine(idSesionValido, "sessionId inválido"), message: z.string().min(1).max(4000) })
 
@@ -96,4 +100,4 @@ app.get("/", pagina("web/index.html"))
 app.get("/arquitectura", pagina("docs/arquitectura.html"))
 
 const puerto = Number(env("PORT", "3000"))
-serve({ fetch: app.fetch, port: puerto }, () => console.log(`Agente de contratos en http://localhost:${puerto} · modelo ${MODELO}`))
+serve({ fetch: app.fetch, port: puerto }, () => console.log(`Agente de contratos en http://localhost:${puerto} · ${PROVEEDOR} · ${MODELO}`))

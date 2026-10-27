@@ -26,6 +26,7 @@
   .arista.bloq path { stroke:var(--err); stroke-width:3; marker-end:url(#flecha-err); }
   .tenue { opacity:.25; }
   @keyframes fluir { to { stroke-dashoffset:-14; } }
+  @media (max-width: 900px) { body { grid-template-columns:1fr; grid-template-rows:auto 1fr auto; } aside { border-left:0; border-top:1px solid var(--line); max-height:45vh; } }
   aside { background:var(--panel); border-left:1px solid var(--line); padding:16px 18px; overflow:auto; }
   aside h2 { font-size:16px; margin:0 0 4px; } aside h3 { font-size:12px; text-transform:uppercase; color:var(--muted); margin:14px 0 4px; letter-spacing:.05em; }
   aside code { background:#f1f3f5; padding:1px 5px; border-radius:4px; font-size:12px; }
