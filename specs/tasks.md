@@ -5,7 +5,7 @@ Cada tarea cita los requisitos que cubre. Se marca `[x]` al terminar y se hace c
 ## Bloque 1 · Esqueleto y deploy temprano
 - [x] T01 `package.json`, `tsconfig.json` (strict, sin `any`), `.gitignore`, `.env.example`
 - [x] T02 `src/server.ts` con `/api/health` + `web/index.html` como placeholder
-- [ ] T03 `Dockerfile` + deploy de prueba (requiere la cuenta del usuario)
+- [x] T03 `Dockerfile` + deploy de prueba (requiere la cuenta del usuario)
 
 ## Bloque 2 · Núcleo de extracción
 - [x] T04 `core/numeros.ts`, `core/fechas.ts`, `core/texto.ts` — R-05, R-06
