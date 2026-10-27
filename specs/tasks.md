@@ -4,7 +4,7 @@ Cada tarea cita los requisitos que cubre. Se marca `[x]` al terminar y se hace c
 
 ## Bloque 1 · Esqueleto y deploy temprano
 - [x] T01 `package.json`, `tsconfig.json` (strict, sin `any`), `.gitignore`, `.env.example`
-- [ ] T02 `src/server.ts` con `/api/health` + `web/index.html` como placeholder
+- [x] T02 `src/server.ts` con `/api/health` + `web/index.html` como placeholder
 - [ ] T03 `Dockerfile` + deploy de prueba (requiere la cuenta del usuario)
 
 ## Bloque 2 · Núcleo de extracción
@@ -21,13 +21,13 @@ Cada tarea cita los requisitos que cubre. Se marca `[x]` al terminar y se hace c
 - [x] T12 `demo.ts` — spec §3 completa, incluida la 2.ª llamada a msg-006
 
 ## Bloque 4 · Agente
-- [ ] T13 `llm/adapter.ts`, `llm/anthropic.ts` (timeout)
-- [ ] T14 `agent/sessions.ts`, `agent/loop.ts` — R-20, R-21, R-22
-- [ ] T15 `agent/prompt.md`, `knowledge/registro-contratos.md` — R-25
-- [ ] T16 Rutas `/api/chat`, `/api/sessions/:id`, `/api/reset` — R-23
+- [x] T13 `llm/adapter.ts`, `llm/anthropic.ts` (timeout)
+- [x] T14 `agent/sessions.ts`, `agent/loop.ts` — R-20, R-21, R-22
+- [x] T15 `agent/prompt.md`, `knowledge/registro-contratos.md` — R-25
+- [x] T16 Rutas `/api/chat`, `/api/sessions/:id`, `/api/reset` — R-23
 
 ## Bloque 5 · Front
-- [ ] T17 Chat: historial, indicador de "pensando", tarjetas de herramientas, banner de confirmación, botón de reinicio — R-24
+- [x] T17 Chat: historial, indicador de "pensando", tarjetas de herramientas, banner de confirmación, botón de reinicio — R-24
 
 ## Bloque 6 · Deploy final
 - [ ] T18 Redeploy + prueba con el prompt del PRD §11
