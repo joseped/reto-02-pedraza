@@ -12,7 +12,8 @@
     "demo": "tsx demo.ts",
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test tests/*.test.ts",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "evidencia": "bash scripts/evidencia.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

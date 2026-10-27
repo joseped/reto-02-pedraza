@@ -1,0 +1,22 @@
+
+Running 13 tests using 1 worker
+
+(node:13119) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:13119) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 e2e/arquitectura.spec.ts:10:1 › dibuja todos los nodos y aristas, sin errores de consola (291ms)
+  ✓   2 e2e/arquitectura.spec.ts:20:1 › clic en un nodo muestra archivo, requisitos y principios (235ms)
+  ✓   3 e2e/arquitectura.spec.ts:30:1 › recorrido ③: la guardia y la herramienta se marcan como bloqueadas (278ms)
+  ✓   4 e2e/arquitectura.spec.ts:43:1 › todos los recorridos llegan al final y la vista general limpia el resaltado (731ms)
+  ✓   5 e2e/arquitectura.spec.ts:54:1 › los recorridos solo resaltan aristas que existen en el diagrama (164ms)
+  ✓   6 e2e/chat.spec.ts:20:1 › health no expone claves e informa protección (19ms)
+  ✓   7 e2e/chat.spec.ts:27:1 › la API rechaza sin clave de acceso y el front la pide (287ms)
+  ✓   8 e2e/chat.spec.ts:36:1 › flujo PRD: procesar buzón, banner de confirmación y registro tras confirmar (708ms)
+  ✓   9 e2e/chat.spec.ts:70:1 › la sesión sobrevive a recargar la página (322ms)
+  ✓  10 e2e/chat.spec.ts:80:1 › reiniciar datos deja el buzón listo para repetir la demo (447ms)
+  ✓  11 e2e/chat.spec.ts:91:1 › el contenido del usuario y del agente se escapa (sin XSS) (243ms)
+  ✓  12 e2e/chat.spec.ts:103:1 › si el servidor se está reiniciando, el mensaje lo explica (326ms)
+  ✓  13 e2e/chat.spec.ts:112:1 › móvil: el chat se usa sin desbordes horizontales (356ms)
+
+  13 passed (5.5s)

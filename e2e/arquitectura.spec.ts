@@ -1,6 +1,7 @@
 // QA del diagrama interactivo (docs/arquitectura.html servido en /arquitectura).
 
 import { expect, test } from "@playwright/test"
+import { capturar } from "./evidencia.ts"
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/arquitectura")
@@ -13,6 +14,7 @@ test("dibuja todos los nodos y aristas, sin errores de consola", async ({ page }
   await expect(page.locator("g.nodo")).toHaveCount(16)
   await expect(page.locator("g.arista")).toHaveCount(15)
   expect(errores).toEqual([])
+  await capturar(page, "07-arquitectura-vista-general")
 })
 
 test("clic en un nodo muestra archivo, requisitos y principios", async ({ page }) => {
@@ -31,6 +33,7 @@ test("recorrido ③: la guardia y la herramienta se marcan como bloqueadas", asy
   await page.keyboard.press("ArrowRight")
   await expect(page.locator("#panel")).toContainText("Paso 2 de 3")
   await expect(page.locator("#n-guardia")).toHaveClass(/bloq/)
+  await capturar(page, "08-arquitectura-autoconfirmacion-bloqueada")
   await page.getByRole("button", { name: "Siguiente →" }).click()
   await expect(page.locator("#n-tools")).toHaveClass(/bloq/)
   await expect(page.getByRole("button", { name: "Siguiente →" })).toBeDisabled()

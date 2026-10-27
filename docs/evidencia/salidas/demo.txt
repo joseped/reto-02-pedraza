@@ -1,0 +1,81 @@
+
+═══ Demo reto 02 · fecha de referencia 2026-09-03 ═══
+
+Buzón: 6 mensajes pendientes
+   ✓ leer_buzon lista los 6 mensajes
+   ✓ msg-005 (cotización) tiene_contrato = false
+
+▸ msg-001 · Contrato firmado - Industrias Delta - Implementación CRM
+   clasificación: nuevo — no hay coincidencia en el maestro (RN3)
+   ⚠ el cliente ya tiene CT-2025-018 ("Soporte y mantenimiento plataforma SAP"), pero el objeto es distinto (similitud 0.24); se trata como contrato nuevo
+   acción: nuevo → out/sharepoint/Contratos/2026/industrias-delta/CT-2026-015.txt
+   ✓ clasificación = nuevo
+   ✓ revisión = []
+   ✓ se escribe en el maestro
+
+▸ msg-002 · Contrato Corporación Andina - Fábrica de software 2026-2027
+   clasificación: nuevo — no hay coincidencia en el maestro (RN3)
+   ⚠ el cliente ya tiene CT-2026-007 ("Servicios de arquitectura de nube y migración"), pero el objeto es distinto (similitud 0.11); se trata como contrato nuevo
+   acción: nuevo → out/sharepoint/Contratos/2026/corporacion-andina-de-servicios/CT-2026-016.txt
+   ✓ clasificación = nuevo
+   ✓ revisión = []
+   ✓ se escribe en el maestro
+
+▸ msg-003 · Otrosí No. 1 contrato CT-2026-011 Minera Los Andes
+   clasificación: actualizacion — otrosí sobre CT-2026-011 (RN2)
+   ⚠ otrosí: exige ampliar la vigencia de las garantías
+   acción: actualizacion → out/sharepoint/Contratos/2026/minera-los-andes/CT-2026-011-otrosi-msg-003.txt
+   ✓ clasificación = actualizacion
+   ✓ revisión = []
+   ✓ se escribe en el maestro
+
+▸ msg-004 · RV: Contrato Clínica San Rafael - Mesa de servicio
+   clasificación: duplicado — ya existe CT-2026-012 con el mismo valor y fechas (RN1); no se escribe nada
+   acción: sin escritura (duplicado)
+   ✓ clasificación = duplicado
+   ✓ revisión = []
+   ✓ no se escribe en el maestro
+
+▸ msg-005 · Cotización propuesta Universidad - ampliación fábrica
+   clasificación: rechazado — sin adjunto de contrato (adjuntos: cotizacion.txt) (RN4)
+   acción: sin escritura (rechazado)
+   ✓ clasificación = rechazado
+   ✓ revisión = []
+   ✓ no se escribe en el maestro
+
+▸ msg-006 · Contrato marco Distribuidora Caribe
+   clasificación: nuevo — no hay coincidencia en el maestro (RN3)
+   requiere revisión: valor, fecha_inicio, fecha_fin, requiere_poliza
+   ⚠ plazo: 12 meses desde la firma (solo se conoce el mes); fecha fin derivada
+   ⚠ valor: el contrato no fija un valor (por demanda); se propone 0
+   ⚠ póliza: exigida solo para algunas órdenes; requiere criterio humano
+   ⚠ remitente jperez@periferia-ficticia.com no está en comerciales.json; se registra igual (no bloquea)
+   ⚠ el cliente ya tiene CT-2026-002 ("Desarrollo de portal de pedidos B2B"), pero el objeto es distinto (similitud 0.09); se trata como contrato nuevo
+   acción: NO REGISTRADO · requiere revisión: valor, fecha_inicio, fecha_fin, requiere_poliza. Pide confirmación explícita a la usuaria y vuelve a llamar con confirmado=true.
+   ✓ clasificación = nuevo
+   ✓ revisión = [valor, fecha_inicio, fecha_fin, requiere_poliza]
+   ✓ no se escribe en el maestro
+
+▸ msg-006 · segunda llamada tras confirmación de la usuaria
+   usuaria: "confirmo el valor 0 y la fecha fin 2027-08-31"
+   acción: nuevo → out/sharepoint/Contratos/2026/distribuidora-caribe/CM-2026-03.txt
+   ✓ msg-006 queda registrado con confirmado=true
+
+▸ Manejo de errores (HU-6)
+   extraer msg-999 → el mensaje msg-999 no existe en el buzón o su correo.json es inválido
+   ✓ mensaje inexistente devuelve { ok:false } sin lanzar
+
+▸ Alertas con hoy = 2026-09-03
+   vencen: CT-2026-004, CT-2026-009
+   polizas_pendientes: CM-2026-03, CT-2026-004, CT-2026-011, CT-2026-015
+   registrados_desde_corte: CM-2026-03, CT-2026-011, CT-2026-015, CT-2026-016
+   vencidos_sin_cierre: CT-2025-018, CT-2026-002
+   ✓ vencen = CT-2026-004, CT-2026-009
+   ✓ pólizas pendientes = CM-2026-03, CT-2026-004, CT-2026-011, CT-2026-015
+   ✓ registrados desde el corte = CM-2026-03, CT-2026-011, CT-2026-015, CT-2026-016
+   ✓ vencidos sin cierre = CT-2025-018, CT-2026-002
+
+Archivos: out/sharepoint/maestro-contratos.csv · out/sharepoint/historial.jsonl · out/alertas.md · out/log.jsonl
+
+✅ Todos los criterios de aceptación se cumplen.
+

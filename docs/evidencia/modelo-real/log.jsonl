@@ -1,0 +1,15 @@
+{"ts":"2026-10-27T23:41:17.486Z","herramienta":"contratos_leer_buzon","mensaje_id":null,"ok":true,"resumen":"6 pendientes, 0 ya procesados"}
+{"ts":"2026-10-27T23:41:21.885Z","herramienta":"contratos_validar","mensaje_id":"msg-001","ok":true,"resumen":"nuevo"}
+{"ts":"2026-10-27T23:41:21.887Z","herramienta":"contratos_validar","mensaje_id":"msg-002","ok":true,"resumen":"nuevo"}
+{"ts":"2026-10-27T23:41:21.888Z","herramienta":"contratos_validar","mensaje_id":"msg-003","ok":true,"resumen":"actualizacion"}
+{"ts":"2026-10-27T23:41:21.889Z","herramienta":"contratos_validar","mensaje_id":"msg-004","ok":true,"resumen":"duplicado"}
+{"ts":"2026-10-27T23:41:21.889Z","herramienta":"contratos_validar","mensaje_id":"msg-005","ok":true,"resumen":"rechazado"}
+{"ts":"2026-10-27T23:41:21.890Z","herramienta":"contratos_validar","mensaje_id":"msg-006","ok":true,"resumen":"nuevo, revisión: valor, fecha_inicio, fecha_fin, requiere_poliza"}
+{"ts":"2026-10-27T23:41:24.703Z","herramienta":"contratos_registrar","mensaje_id":"msg-001","ok":true,"resumen":"nuevo CT-2026-015 → Contratos/2026/industrias-delta/CT-2026-015.txt"}
+{"ts":"2026-10-27T23:41:24.708Z","herramienta":"contratos_registrar","mensaje_id":"msg-002","ok":true,"resumen":"nuevo CT-2026-016 → Contratos/2026/corporacion-andina-de-servicios/CT-2026-016.txt"}
+{"ts":"2026-10-27T23:41:24.712Z","herramienta":"contratos_registrar","mensaje_id":"msg-003","ok":true,"resumen":"actualizacion CT-2026-011 → Contratos/2026/minera-los-andes/CT-2026-011-otrosi-msg-003.txt"}
+{"ts":"2026-10-27T23:41:24.714Z","herramienta":"contratos_registrar","mensaje_id":"msg-004","ok":true,"resumen":"duplicado: ya existe CT-2026-012 con el mismo valor y fechas (RN1); no se escribe nada"}
+{"ts":"2026-10-27T23:41:24.715Z","herramienta":"contratos_registrar","mensaje_id":"msg-005","ok":true,"resumen":"rechazado: sin adjunto de contrato (adjuntos: cotizacion.txt) (RN4)"}
+{"ts":"2026-10-27T23:41:26.278Z","herramienta":"contratos_alertas","mensaje_id":null,"ok":true,"resumen":"vencen CT-2026-009, CT-2026-004 · pólizas CT-2026-004, CT-2026-015, CT-2026-011 · vencidos CT-2025-018, CT-2026-002"}
+{"ts":"2026-10-27T23:41:43.540Z","herramienta":"contratos_registrar","mensaje_id":"msg-006","ok":true,"resumen":"nuevo CM-2026-03 → Contratos/2026/distribuidora-caribe/CM-2026-03.txt"}
+{"ts":"2026-10-27T23:41:45.020Z","herramienta":"contratos_alertas","mensaje_id":null,"ok":true,"resumen":"vencen CT-2026-009, CT-2026-004 · pólizas CT-2026-004, CT-2026-015, CM-2026-03, CT-2026-011 · vencidos CT-2025-018, CT-2026-002"}

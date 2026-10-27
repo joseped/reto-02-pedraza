@@ -139,7 +139,7 @@ Con 10 a 30 contratos al mes, el costo es inferior a USD 5 mensuales. El costo r
 | HU-5 Alertas | Hecho, más una sección extra | `out/alertas.md` | Envío programado a gerencia (correo o Teams) |
 | HU-6 Errores | Hecho | `{ ok:false }` en todas las herramientas; tests | Reintentos y cola de mensajes fallidos |
 | Agente, API, front | Hecho | `src/agent`, `src/server.ts`, `web/` | Autenticación SSO y roles |
-| QA end-to-end | Hecho | `npm run e2e`: 13 escenarios de Playwright en Chrome (flujo PRD, sesión, reinicio, clave de acceso, XSS, error de arranque, móvil, diagrama). Detectó y se corrigió un desborde en móvil | Correr en CI en cada push |
+| QA end-to-end ([evidencia](docs/evidencia/README.md)) | Hecho | `npm run e2e`: 13 escenarios de Playwright en Chrome (flujo PRD, sesión, reinicio, clave de acceso, XSS, error de arranque, móvil, diagrama). Detectó y se corrigió un desborde en móvil | Correr en CI en cada push |
 | Bonus `modulo/` | No hecho | El prompt y el conocimiento ya tienen el frontmatter requerido | Empaquetar reutilizando los mismos archivos |
 
 ## 10. Uso de IA

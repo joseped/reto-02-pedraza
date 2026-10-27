@@ -2,6 +2,7 @@
 
 import { expect, test, type Page } from "@playwright/test"
 import { CLAVE_QA } from "../playwright.config.ts"
+import { capturar } from "./evidencia.ts"
 
 const PROMPT_PRD = "▶ Procesar buzón (PRD)"
 const CONFIRMAR = "✔ Confirmar msg-006"
@@ -44,12 +45,14 @@ test("flujo PRD: procesar buzón, banner de confirmación y registro tras confir
   await expect(r1.locator("details.tool .ko")).toHaveCount(0)
   await expect(r1.locator(".md table")).toBeVisible()
   await expect(r1).toContainText("msg-006")
+  await capturar(r1, "01-turno1-buzon-procesado-y-revision")
 
   // La tarjeta de herramienta muestra argumentos y resultado (trazabilidad visible, CA4).
   const validar006 = r1.locator("details.tool", { hasText: "revisión: valor, fecha_inicio, fecha_fin, requiere_poliza" })
   await validar006.locator("summary").click()
   await expect(validar006.locator("pre")).toContainText('"mensaje_id": "msg-006"')
   await expect(validar006.locator("pre")).toContainText('"confianza": 0.5')
+  await capturar(validar006, "02-tarjeta-herramienta-validar-msg006")
 
   await page.getByRole("button", { name: CONFIRMAR }).click()
   const r2 = ultimaRespuesta(page)
@@ -57,6 +60,11 @@ test("flujo PRD: procesar buzón, banner de confirmación y registro tras confir
   await expect(r2.locator(".banner")).toHaveCount(0)
   await expect(r2.locator("details.tool", { hasText: "contratos_registrar" })).toContainText("nuevo CM-2026-03")
   await expect(r2.locator("details.tool", { hasText: "contratos_alertas" })).toHaveCount(1)
+  await capturar(r2, "03-turno2-confirmacion-registrada")
+
+  // Regresión: ningún mensaje queda aplastado con scroll interno; el que hace scroll es el chat.
+  const aplastados = await page.locator(".msg").evaluateAll((ms) => ms.filter((m) => m.scrollHeight > m.clientHeight + 1).length)
+  expect(aplastados).toBe(0)
 })
 
 test("la sesión sobrevive a recargar la página", async ({ page }) => {
@@ -89,6 +97,7 @@ test("el contenido del usuario y del agente se escapa (sin XSS)", async ({ page 
   expect(await page.evaluate(() => (window as unknown as { __xss?: number }).__xss)).toBeUndefined()
   await expect(page.locator(".msg img")).toHaveCount(0)
   await expect(page.locator(".msg.usuario").last()).toHaveText(ataque)
+  await capturar(page, "04-xss-escapado")
 })
 
 test("si el servidor se está reiniciando, el mensaje lo explica", async ({ page }) => {
@@ -96,6 +105,7 @@ test("si el servidor se está reiniciando, el mensaje lo explica", async ({ page
   await page.route("**/api/chat", (r) => r.fulfill({ status: 503, contentType: "text/html", body: "<html>Service Unavailable</html>" }))
   await page.getByRole("button", { name: PROMPT_PRD }).click()
   await expect(ultimaRespuesta(page).locator(".error")).toContainText("se está iniciando")
+  await capturar(ultimaRespuesta(page), "05-aviso-servidor-iniciando")
   await expect(page.getByRole("button", { name: "Enviar" })).toBeEnabled()
 })
 
@@ -107,4 +117,5 @@ test("móvil: el chat se usa sin desbordes horizontales", async ({ page }) => {
   const desborde = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
   expect(desborde).toBeLessThanOrEqual(1)
   await expect(page.getByRole("button", { name: "Enviar" })).toBeInViewport()
+  await capturar(page, "06-movil-390px")
 })

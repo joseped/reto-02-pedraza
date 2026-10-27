@@ -4,6 +4,7 @@ Agente conversacional que actúa como **punto único de recepción** de contrato
 
 - **Link de prueba:** https://agente-contratos-rga2.onrender.com (plan gratuito: si estuvo inactivo, el primer acceso tarda alrededor de un minuto). El chat pide una **clave de acceso** que se entrega por separado a los evaluadores. El botón "Reiniciar datos" deja el buzón listo para repetir la demo.
 - **Arquitectura interactiva:** https://agente-contratos-rga2.onrender.com/arquitectura ([docs/arquitectura.html](docs/arquitectura.html))
+- **Evidencia de pruebas** (incluye una corrida con el modelo real): [docs/evidencia/](docs/evidencia/README.md)
 - **Diseño y decisiones:** [SOLUCION.md](SOLUCION.md) · **Especificación (SDD):** [specs/](specs/)
 
 ## Requisitos
