@@ -69,7 +69,7 @@ function md(texto) {
       while (/^\s*\|/.test(lineas[i + 1] || "")) h += "<tr>" + celdas(lineas[++i]).map((c) => `<td>${c}</td>`).join("") + "</tr>"
       out.push(h + "</table>")
     } else if (/^#{1,4} /.test(l)) out.push(`<h3>${inline(l.replace(/^#+ /, ""))}</h3>`)
-    else if (/^\s*[-*] /.test(l)) out.push(`<div>• ${inline(l.replace(/^\s*[-*] /, ""))}</div>`)
+    else if (/^\s*[-*] /.test(l)) { const n = Math.floor(l.match(/^\s*/)[0].length / 2); out.push(`<div style="padding-left:${n * 18}px">${n ? "◦" : "•"} ${inline(l.replace(/^\s*[-*] /, ""))}</div>`) }
     else if (l.trim()) out.push(`<p>${inline(l)}</p>`)
   }
   return out.join("")

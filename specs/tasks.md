@@ -30,7 +30,7 @@ Cada tarea cita los requisitos que cubre. Se marca `[x]` al terminar y se hace c
 - [x] T17 Chat: historial, indicador de "pensando", tarjetas de herramientas, banner de confirmación, botón de reinicio — R-24
 
 ## Bloque 6 · Deploy final
-- [ ] T18 Redeploy + prueba con el prompt del PRD §11
+- [x] T18 Redeploy + prueba con el prompt del PRD §11
 
 ## Bloque 7 · Documentación
 - [x] T19 `README.md`
