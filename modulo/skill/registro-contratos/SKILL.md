@@ -1,0 +1,1 @@
+../../../src/knowledge/registro-contratos.md

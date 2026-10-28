@@ -13,6 +13,7 @@ Implementa `spec.md` respetando `constitution.md`. Los nombres de funciones y ar
 | Proveedor de QA | `SimuladoAdapter` (`LLM_PROVIDER=simulado`) | QA en navegador gratis, sin clave y determinista; demuestra el cambio de proveedor | Llamar al modelo real en cada corrida: lento, con costo y no determinista |
 | Front | `web/index.html` + JS plano | Sin compilación ni CORS y con menos piezas que se puedan romper | React: demasiado para una sola pantalla |
 | Pruebas | `node:test` (ciclo), `@playwright/test` con el Chrome instalado (navegador) | Sin descargar navegadores ni frameworks extra | Playwright MCP: no estaba cargado en la sesión de desarrollo y no deja pruebas reproducibles en el repo |
+| Módulo reutilizable | Enlaces simbólicos + reexportación, verificados por test | Una sola fuente de verdad: imposible que diverjan | Copiar los archivos con un script de sincronización: dos fuentes que pueden divergir |
 | Deploy | Docker → Render (`render.yaml`), link protegido con `ACCESS_KEY` | Servidor con estado y disco para `out/` | Vercel: es serverless y la sesión y `out/` no sobreviven entre peticiones |
 
 ## Módulos
@@ -45,6 +46,8 @@ src/knowledge/registro-contratos.md   reglas de negocio                         
 docs/arquitectura.html   diagrama interactivo                                          [R-32]
 demo.ts                  criterios de spec §3.1
 tests/guardia.test.ts    criterios de spec §3.2 (directorio temporal, nunca toca out/ real)
+tests/modulo.test.ts     criterios de spec §3.2 para el módulo                         [R-34]
+modulo/                  agent.md y skill/…/SKILL.md (enlaces simbólicos), tools/contratos.ts (reexporta)  [R-34]
 e2e/                     criterios de spec §3.3 y §3.4; evidencia.ts (capturas)        [R-33]
 scripts/evidencia.sh     regenera docs/evidencia/                                      [R-33]
 ```

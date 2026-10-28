@@ -59,3 +59,7 @@ Cada tarea cita los requisitos que cubre. Se marca `[x]` al terminar y se hace c
 - [x] T33 `scripts/evidencia.sh` + `e2e/live.spec.ts` + `docs/evidencia/` — R-33, spec §3.4, P10
 - [x] T34 Corregir los mensajes recortados detectados en las capturas, con prueba de regresión — R-24
 - [x] T35 Actualizar constitución, spec, plan, tareas, SOLUCION.md y README con todo lo anterior
+
+## Bloque 12 · Bonus
+- [x] T36 `modulo/`: frontmatter `mode` y `permission` en `agent/prompt.md`, enlaces simbólicos, reexportación de herramientas y `modulo/README.md` — R-34
+- [x] T37 `tests/modulo.test.ts`: mismas piezas, frontmatter válido y ejecución sin servidor — R-34

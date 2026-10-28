@@ -5,6 +5,7 @@ Agente conversacional que actúa como **punto único de recepción** de contrato
 - **Link de prueba:** https://agente-contratos-rga2.onrender.com (plan gratuito: si estuvo inactivo, el primer acceso tarda alrededor de un minuto). El chat pide una **clave de acceso** que se entrega por separado a los evaluadores. El botón "Reiniciar datos" deja el buzón listo para repetir la demo.
 - **Arquitectura interactiva:** https://agente-contratos-rga2.onrender.com/arquitectura ([docs/arquitectura.html](docs/arquitectura.html))
 - **Evidencia de pruebas** (incluye una corrida con el modelo real): [docs/evidencia/](docs/evidencia/README.md)
+- **Módulo reutilizable (bonus):** [modulo/](modulo/README.md)
 - **Diseño y decisiones:** [SOLUCION.md](SOLUCION.md) · **Especificación (SDD):** [specs/](specs/)
 
 ## Requisitos
@@ -20,7 +21,7 @@ Sin clave, el servidor arranca igual: el chat avisa que falta la clave y `demo.t
 ## Verificación
 ```bash
 npm run demo                  # herramientas sin modelo: criterios de aceptación de la spec (sale con código 1 si alguno falla)
-npm test                      # ciclo del agente con un LLM simulado: guardia de confirmación, errores, topes
+npm test                      # ciclo del agente con un LLM simulado (guardia, errores, topes) y el módulo reutilizable
 npm run e2e                   # QA en navegador con Playwright (usa tu Chrome; servidor con LLM_PROVIDER=simulado)
 npm run evidencia             # regenera docs/evidencia/ con las tres suites y capturas
 npm run evidencia -- --live   # además, el flujo del PRD con el modelo real (usa la clave de .env; unos USD 0.30)
@@ -63,6 +64,7 @@ src/agent/                            ciclo del agente y sesiones
 src/server.ts                         API + front estático
 web/index.html                        chat
 src/llm/simulado.ts                   proveedor simulado para QA (LLM_PROVIDER=simulado)
+modulo/                               bonus: agente empaquetado (mismas piezas que la app, ver modulo/README.md)
 demo.ts · tests/ · e2e/               verificación: herramientas, ciclo del agente, navegador
 scripts/evidencia.sh                  genera docs/evidencia/
 docs/arquitectura.html                diagrama interactivo (también en /arquitectura)

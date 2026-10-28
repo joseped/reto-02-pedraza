@@ -2,39 +2,69 @@ TAP version 13
 # Subtest: el modelo no puede autoconfirmar en el mismo turno en que surge la revisión
 ok 1 - el modelo no puede autoconfirmar en el mismo turno en que surge la revisión
   ---
-  duration_ms: 7.716542
+  duration_ms: 8.061791
   ...
 # Subtest: con confirmación explícita en el turno siguiente, registra con las correcciones
 ok 2 - con confirmación explícita en el turno siguiente, registra con las correcciones
   ---
-  duration_ms: 3.457791
+  duration_ms: 3.273041
   ...
 # Subtest: un mensaje que no es afirmación no habilita la confirmación
 ok 3 - un mensaje que no es afirmación no habilita la confirmación
   ---
-  duration_ms: 2.720625
+  duration_ms: 2.551292
   ...
 # Subtest: argumentos inválidos vuelven al modelo como error, sin ejecutar
 ok 4 - argumentos inválidos vuelven al modelo como error, sin ejecutar
   ---
-  duration_ms: 0.986625
+  duration_ms: 0.927834
   ...
 # Subtest: un error del proveedor LLM se informa y la sesión sigue viva
 ok 5 - un error del proveedor LLM se informa y la sesión sigue viva
   ---
-  duration_ms: 1.117542
+  duration_ms: 0.772042
   ...
 # Subtest: el tope de iteraciones corta el turno con un mensaje claro
 ok 6 - el tope de iteraciones corta el turno con un mensaje claro
   ---
-  duration_ms: 1.68875
+  duration_ms: 1.654583
   ...
-1..6
-# tests 6
+# Subtest: agent.md es el mismo archivo que agent/prompt.md (system prompt de la app)
+ok 7 - agent.md es el mismo archivo que agent/prompt.md (system prompt de la app)
+  ---
+  duration_ms: 0.326125
+  ...
+# Subtest: SKILL.md es el mismo archivo que el conocimiento de la app
+ok 8 - SKILL.md es el mismo archivo que el conocimiento de la app
+  ---
+  duration_ms: 0.080167
+  ...
+# Subtest: tools/contratos.ts exporta los mismos objetos que la app
+ok 9 - tools/contratos.ts exporta los mismos objetos que la app
+  ---
+  duration_ms: 0.226458
+  ...
+# Subtest: agent.md tiene el frontmatter exigido (description, mode: primary, permission edit/bash deny)
+ok 10 - agent.md tiene el frontmatter exigido (description, mode: primary, permission edit/bash deny)
+  ---
+  duration_ms: 0.211708
+  ...
+# Subtest: SKILL.md tiene name (igual a su carpeta) y description
+ok 11 - SKILL.md tiene name (igual a su carpeta) y description
+  ---
+  duration_ms: 0.106708
+  ...
+# Subtest: cada herramienta cumple el contrato y se ejecuta sin el servidor
+ok 12 - cada herramienta cumple el contrato y se ejecuta sin el servidor
+  ---
+  duration_ms: 2.194042
+  ...
+1..12
+# tests 12
 # suites 0
-# pass 6
+# pass 12
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 130.310417
+# duration_ms 143.076875

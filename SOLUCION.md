@@ -120,6 +120,7 @@ Con 10 a 30 contratos al mes, el costo es inferior a USD 5 mensuales. El costo r
 | D7 | `estado_poliza → pendiente` cuando un otrosí exige ampliar garantías | Dejar la póliza `vigente` | La póliza vigente no cubre el nuevo plazo. Mejor una alerta de más que una garantía vencida |
 | D8 | **Proveedor `simulado`** para el QA en navegador | Usar el modelo real en cada corrida | Gratis, sin clave y determinista; además demuestra que cambiar de proveedor no toca el ciclo. El modelo real se valida aparte, con una corrida documentada (`e2e/live.spec.ts`) |
 | D9 | Pruebas Playwright en el repositorio, con el Chrome instalado | QA exploratorio con Playwright MCP | Quedan reproducibles (`npm run e2e`) y sirven como evidencia y regresión. El MCP no estaba disponible en la sesión de desarrollo |
+| D10 | Módulo con **enlaces simbólicos y reexportación** | Copiar los archivos a `modulo/` | Una sola fuente de verdad: el módulo no puede divergir de la app, y un test lo comprueba. El costo es que en Windows hay que clonar con `core.symlinks=true` |
 
 ## 8. Supuestos
 
@@ -144,7 +145,7 @@ Con 10 a 30 contratos al mes, el costo es inferior a USD 5 mensuales. El costo r
 | HU-6 Errores | Hecho | `{ ok:false }` en todas las herramientas; tests | Reintentos y cola de mensajes fallidos |
 | Agente, API, front | Hecho | `src/agent`, `src/server.ts`, `web/` | Autenticación SSO y roles |
 | QA end-to-end ([evidencia](docs/evidencia/README.md)) | Hecho | `npm run e2e`: 13 escenarios de Playwright en Chrome (flujo PRD, sesión, reinicio, clave de acceso, XSS, error de arranque, móvil, diagrama) y una corrida con el modelo real. Detectó dos defectos del front (desborde en móvil, mensajes recortados), ya corregidos y con prueba de regresión | Correr en CI en cada push |
-| Bonus `modulo/` | No hecho | El prompt y el conocimiento ya tienen el frontmatter requerido | Empaquetar reutilizando los mismos archivos |
+| Bonus `modulo/` | Hecho | [`modulo/`](modulo/README.md): `agent.md` y `SKILL.md` son enlaces simbólicos a los archivos de la app, y `tools/contratos.ts` reexporta los mismos objetos. `tests/modulo.test.ts` verifica que no hay copias divergentes y que las herramientas corren sin el servidor | Publicarlo como paquete versionado |
 
 ## 10. Uso de IA
 

@@ -4,8 +4,8 @@ Generada con `npm run evidencia -- --live` ([scripts/evidencia.sh](../../scripts
 
 | | |
 |---|---|
-| Fecha | 2026-10-27 18:41 (-05) |
-| Código | commit `c28f269` más los cambios del commit que agrega esta carpeta (corrección de mensajes aplastados en el chat) |
+| Fecha | Suites: 2026-10-27 18:59 (-05) · corrida con el modelo real: 2026-10-27 18:41 (-05) |
+| Código | Suites: commit `0d975c9` más los cambios del commit del módulo reutilizable. Modelo real: commit `c28f269` más la corrección de mensajes aplastados (el comportamiento del agente no cambió desde entonces) |
 | Entorno | Node v22.14.0 · macOS (Darwin 25.6.0) · Google Chrome 156 · Playwright 1.64.1 |
 | Fecha de referencia del negocio | `FECHA_HOY=2026-09-03` (la del PRD) |
 
@@ -14,7 +14,7 @@ Generada con `npm run evidencia -- --live` ([scripts/evidencia.sh](../../scripts
 | Suite | Qué prueba | Resultado | Salida |
 |---|---|---|---|
 | `demo.ts` | Herramientas sin modelo contra los criterios de aceptación de [spec §3](../../specs/spec.md) | **26 ✓ · 0 ✗** | [demo.txt](salidas/demo.txt) |
-| `npm test` | Ciclo del agente con LLM simulado: guardia de confirmación, argumentos maliciosos, error del proveedor, tope de iteraciones | **6 / 6** | [tests-guardia.txt](salidas/tests-guardia.txt) |
+| `npm test` | Ciclo del agente con LLM simulado (guardia de confirmación, argumentos maliciosos, error del proveedor, tope de iteraciones) y módulo reutilizable (mismas piezas que la app, frontmatter, ejecución sin servidor) | **12 / 12** | [tests-guardia.txt](salidas/tests-guardia.txt) |
 | `npm run e2e` | Navegador (Playwright + Chrome): flujo PRD, sesión, reinicio, clave de acceso, XSS, error de arranque, móvil y diagrama | **13 / 13** | [e2e.txt](salidas/e2e.txt) |
 | E2E con **modelo real** | Flujo PRD §11 de punta a punta con `claude-opus-5-5` | **1 / 1** · 78.754 tokens | [e2e-modelo-real.txt](salidas/e2e-modelo-real.txt) |
 

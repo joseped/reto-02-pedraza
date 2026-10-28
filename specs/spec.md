@@ -61,6 +61,7 @@ El maestro de contratos está congelado desde el 2026-05-30 y solo llegan a admi
 ### Documentación y calidad
 - **R-32** Diagrama de arquitectura interactivo (`docs/arquitectura.html`): nodos con archivo, requisitos y principios, y recorridos animados (buzón, confirmación, autoconfirmación bloqueada, `demo.ts`).
 - **R-33** QA en navegador con Playwright (`npm run e2e`) y evidencia reproducible en `docs/evidencia/` (`npm run evidencia`, con `--live` para una corrida con el modelo real).
+- **R-34** Bonus PRD §9.4: `modulo/` con `agent.md` (frontmatter `description`, `mode: primary`, `permission { edit: deny, bash: deny }`), `tools/contratos.ts` y `skill/registro-contratos/SKILL.md` (frontmatter `name`, `description`). Son **las mismas piezas** que usa la app: `agent.md` y `SKILL.md` son enlaces simbólicos a `agent/prompt.md` y `src/knowledge/registro-contratos.md`, y `tools/contratos.ts` reexporta los mismos objetos. Las herramientas se importan sin el servidor.
 
 ## 3. Criterios de aceptación
 
@@ -80,7 +81,7 @@ Alertas con `hoy=2026-09-03`: (a) CT-2026-009 (2026-09-30) y CT-2026-004 (2026-1
 
 Un mensaje inexistente devuelve `{ ok:false }` sin lanzar excepción.
 
-### 3.2 Agente (los verifica `tests/guardia.test.ts`, con un LLM simulado)
+### 3.2 Agente y módulo (los verifican `tests/guardia.test.ts`, con un LLM simulado, y `tests/modulo.test.ts`)
 
 | Escenario | Resultado esperado |
 |---|---|
@@ -90,6 +91,8 @@ Un mensaje inexistente devuelve `{ ok:false }` sin lanzar excepción.
 | Argumentos inválidos (por ejemplo, `../../etc`) | Error al modelo sin ejecutar (R-19) |
 | Error del proveedor LLM | Se informa y la sesión sigue viva (P6) |
 | Tope de iteraciones | Corta el turno con un mensaje claro (R-20) |
+| Módulo: `agent.md` y `SKILL.md` | Resuelven a los mismos archivos que la app; frontmatter válido (R-34) |
+| Módulo: `tools/contratos.ts` | Exporta los mismos objetos que la app y `leer_buzon` corre sin el servidor (R-34) |
 
 ### 3.3 Navegador (los verifica `e2e/`, con el proveedor simulado)
 
@@ -108,7 +111,7 @@ Con `claude-opus-5-5` y el prompt del PRD §11: el turno 1 termina con banner y 
 - **D5 · Sección de alertas adicional (d)**: el PRD no la pide, pero responde la pregunta de gerencia sobre qué está vencido y sigue abierto.
 
 ## 5. Fuera de alcance
-OCR, PDF nativo (P1 `leer_pdf`), autenticación de usuarios, base de datos, Exchange/SharePoint reales y el bonus `modulo/` (no implementado; el prompt y el conocimiento ya tienen el frontmatter requerido).
+OCR, PDF nativo (P1 `leer_pdf`), autenticación de usuarios, base de datos y Exchange/SharePoint reales.
 
 ## 6. Historial de cambios de la spec
 
@@ -119,3 +122,4 @@ OCR, PDF nativo (P1 `leer_pdf`), autenticación de usuarios, base de datos, Exch
 | 1.2 | Pruebas en el link público | R-28 y P9: el agente ofrecía corregir un contrato ya registrado. R-29: preguntaba si regenerar las alertas en vez de hacerlo. R-24: listas anidadas planas y "sin conexión" durante un redespliegue |
 | 1.3 | Seguridad y QA | R-30 (clave de acceso), R-31 (proveedor simulado), R-32 (diagrama), R-33 (QA y evidencia), P10. El QA encontró dos defectos del front (desborde en móvil y mensajes recortados), incorporados a R-24 con sus pruebas de regresión |
 | 1.4 | Revisión de congruencia | R-02 se alineó con la implementación: detecta contratos por el adjunto y no por el texto. R-03, R-10, R-16 y R-23 se completaron con lo que el código ya hacía |
+| 1.5 | Bonus del PRD | R-34: módulo reutilizable sin copias divergentes, con sus pruebas |
