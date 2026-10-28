@@ -153,8 +153,6 @@ Con 10 a 30 contratos al mes, el costo es inferior a USD 5 mensuales. El costo r
 |---|---|---|
 | **Claude Code (Claude Opus 5.5)** | Análisis de los fixtures para encontrar trampas, redacción de la especificación SDD, generación del código, de `demo.ts`, de los tests y de las pruebas E2E, el diagrama de arquitectura y el borrador de esta documentación | (1) Propuso Bun, que reemplacé por Node porque no estaba instalado y el PRD lo permite. (2) Evaluamos Vercel para el despliegue y lo descartamos por el estado entre peticiones (D6). (3) La primera versión dejaba la moneda del contrato marco con confianza 0.5 sin justificación; la ajusté para tomar la moneda solo si el texto la nombra. (4) Un criterio de `demo.ts` tenía un error de precedencia que daba un falso fallo; lo corregí. (5) Endurecí la confirmación: no basta con el prompt, se agregó la guardia en el servidor. (6) En las pruebas con el modelo real y en producción encontré conductas que corregí: notas internas en inglés en la respuesta, una oferta de corregir lo que el agente no puede corregir y alertas que no se regeneraban (spec §6). (7) El QA y la revisión de la evidencia encontraron dos defectos visuales que la demo sin navegador no detectaba. |
 
-Todas las decisiones de interpretación (sección 8) las revisé y aprobé antes de implementarlas, y puedo explicar cada línea del código entregado. Cada cambio posterior a la primera entrega quedó registrado en la spec (§6, historial de cambios) y en las tareas (bloques 8 a 11).
-
 ## 11. Riesgos de producción y mitigación
 
 | Riesgo | Mitigación |
